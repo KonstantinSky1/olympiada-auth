@@ -17,9 +17,7 @@ export const CurrentUserContext = React.createContext();
 
 export const CurrentUserContextProvider = ({ children }) => {
   const [loggedIn, setLoggedIn] = useState(loggedInMap.loading);
-  console.log("🚀 ~ file: CurrentUserContext.js ~ line 20 ~ CurrentUserContextProvider ~ loggedIn", loggedIn)
   const [currentUser, setCurrentUser] = useState(defaultUser);
-  // const [stateInfoTooltip, setStateInfoTooltip] = useState(false);
 
   useEffect(() => {
     const jwt = localStorage.getItem('jwt');
@@ -35,9 +33,8 @@ export const CurrentUserContextProvider = ({ children }) => {
         })
           .catch((err) => {
             if (err) {
-              console.log('ssfsdfff')
-              // setStateInfoTooltip(true);
-              // userLoggOut();
+              // Если бэкенд недоступен или в БД нет пользователя у которого JWT совпадает с JWT записанным в данный момент в localStorage, то разлогируемся и редирект на главную чтобы приложение работало
+              handleSignOut();
             }
           });
     } else {
@@ -53,12 +50,7 @@ export const CurrentUserContextProvider = ({ children }) => {
       .then(user => {
         setCurrentUser(user);
       })
-        .catch(err => {
-          console.log(err)
-          if (err) {
-            // setStateInfoTooltip(true);
-          }
-        });
+        .catch(err => console.log(err));
     }
   }, [loggedIn]);
 

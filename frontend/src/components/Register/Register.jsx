@@ -1,6 +1,5 @@
 import React, { useContext } from "react";
-// import { useHistory } from 'react-router-dom';
-import { Link } from "react-router-dom";
+import { Link, useNavigate   } from "react-router-dom";
 import * as auth from '../../utils/Auth.js';
 import { CurrentUserContext } from '../../contexts/CurrentUserContext.js';
 import { useFormWithValidation } from '../../hooks/UseForm.js';
@@ -15,21 +14,24 @@ function Register() {
     name: ''
   };
 
-  // const history = useHistory();
+  const navigate = useNavigate();
+
   const { userLoggined } = useContext(CurrentUserContext);
   const { values, handleChange, isValid, errors, errMessage, setErrMessage, setIsValid } = useFormWithValidation(defaultUser);
 
   function handleRegister(email, password, name) {
     setIsValid(false); //блокируем сабмит во время отправки запроса
 
+    //записываем в БД данные пользователя
     return auth.register(email, password, name)
       .then((res) => {
         if (!res) return;
 
+        //после регистрации запускаем авторизацию, чтобы получить токен и записать его в localStorage. После успешной авторизации редирект на страницу добавления вопросов
         return auth.authorize(email, password)
           .then(() => {
             userLoggined();
-            // history.push('/movies');
+            navigate("/questions");
           })
       })
         .catch(err => {
@@ -93,7 +95,6 @@ function Register() {
                 errorMessage={errors.email}
               />
             </div>
-
             <div>
               <input
                 onChange={handleChange}
