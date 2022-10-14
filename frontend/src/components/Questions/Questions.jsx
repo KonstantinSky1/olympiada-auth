@@ -18,7 +18,7 @@ function Questions() {
   }
 
   const { handleSignOut, currentUser } = useContext(CurrentUserContext);
-  const { values, handleChange, errors, resetForm, isValid, setIsValid } = useFormWithValidation(defaultQuestions);
+  const { values, handleChange, errors, resetForm, isValid } = useFormWithValidation(defaultQuestions);
 
   const [addTopicState, setAddTopicState] = useState(false);
   const [inputFieldsWrowngAnswer, setInputFieldsWrowngAnswer] = useState([
@@ -28,10 +28,11 @@ function Questions() {
   ]);
   const [valuesTopic, setValuesTopic] = useState(defaultTopic);
   const [errorsInputTopic, setErrorsInputTopic] = useState(defaultTopic);
+  const [isValidInputTopic, setIsValidInputTopic] =useState(false);
   const [showInputsState, setShowInputsState] = useState(false);
 
   const handleChangeInputTopic = (event) => {
-    const {name, value} = event.target;
+    let {name, value} = event.target;
 
     setValuesTopic(prev => (
       {
@@ -47,7 +48,7 @@ function Questions() {
       }
     ));
 
-    setIsValid(event.target.closest("form").checkValidity());
+    setIsValidInputTopic(event.target.closest("form").checkValidity());
   };
 
   // Записать значение инпута с неправильным ответом в стейт inputFieldsWrowngAnswer
@@ -145,6 +146,8 @@ function Questions() {
                   />
                   {!showInputsState &&
                     <button
+                      disabled={!isValidInputTopic}
+                      style={!isValidInputTopic ? {backgroundColor: '#b4b6b8', cursor: 'auto', opacity: '1'} : null}
                       className="questions__button questions__button_type_margin"
                       type="button"
                       onClick={handleShowInputs}
@@ -242,8 +245,6 @@ function Questions() {
                     </div>
                   </>
                 }
-
-
               </div>
               <div className="questions__form-buttonsBlock">
                 <button
@@ -267,6 +268,7 @@ function Questions() {
                     setValuesTopic(defaultTopic);
                     setErrorsInputTopic(defaultTopic);
                     setShowInputsState(false);
+                    setIsValidInputTopic(false);
                   }}
                   className="questions__button"
                 >
