@@ -11,7 +11,9 @@ function Register() {
   const defaultUser = {
     email: '',
     password: '',
-    name: ''
+    name: '',
+    tel: '',
+    sms: ''
   };
 
   const navigate = useNavigate();
@@ -45,7 +47,17 @@ function Register() {
         })
   }
 
-  function handleSubmit(event) {
+  //в этой функции получаем данные инпута с телефоном
+  function getPhoneNumber(event) {
+    event.preventDefault();
+
+    const { tel } = values;
+
+    console.log(tel)
+    return tel;
+  }
+
+    function handleSubmit(event) {
     event.preventDefault();
 
     const {email, password, name} = values;
@@ -66,7 +78,7 @@ function Register() {
           name="register-form"
         >
           <div className="register__inputsBlock">
-            <div>
+            {/* <div>
               <input
                 onChange={handleChange}
                 value={values.name}
@@ -109,9 +121,49 @@ function Register() {
               <ErrorMessage
                 errorMessage={errors.password}
               />
+            </div> */}
+            <div>
+              <input
+                onChange={handleChange}
+                value={values.tel}
+                className="register__input"
+                type="tel"
+                name="tel"
+                placeholder="Введите номер телефона..."
+                required
+              />
+              <ErrorMessage
+                errorMessage={errors.tel}
+              />
+            </div>
+            {/* этот инпут должен будет появляться только после получения смс */}
+            <div>
+              <input
+                onChange={handleChange}
+                value={values.sms}
+                className="register__input"
+                type="text"
+                name="sms"
+                placeholder="Введите полученный смс..."
+                // required
+              />
+              <ErrorMessage
+                errorMessage={errors.sms}
+              />
             </div>
           </div>
-          <div className="register__buttonsBlock">
+
+          <button
+            onClick={getPhoneNumber}
+            type="button"
+            disabled={!isValid}
+            className="register__buttonSubmit"
+            style={!isValid ? {backgroundColor: '#b4b6b8', cursor: 'auto', opacity: '1'} : null}
+          >
+            Получить смс
+          </button>
+
+          {/* <div className="register__buttonsBlock">
             <ErrorMessage
               errorMessage={errMessage}
               style={{padding: '0 0 10px 0'}}
@@ -128,7 +180,7 @@ function Register() {
               Уже зарегистрированы?
               <span className="register__linkText">Войти</span>
             </Link>
-          </div>
+          </div> */}
         </form>
       </div>
     </section>

@@ -8,35 +8,88 @@ import './Questions.css';
 import ErrorMessage from '../ErrorMessage/ErrorMessage.jsx';
 
 function Questions() {
-  // здесь поля придумать!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   const defaultQuestions = {
-    topic: '',
     question: '',
     correct_answer: '',
     help: ''
   };
+  const defaultTopic = {
+    topic: ''
+  }
 
   const { handleSignOut, currentUser } = useContext(CurrentUserContext);
-  const { values, handleChange, errors, resetForm, isValid } = useFormWithValidation(defaultQuestions);
+  const { values, handleChange, errors, resetForm, isValid, setIsValid } = useFormWithValidation(defaultQuestions);
 
   const [addTopicState, setAddTopicState] = useState(false);
-  const [addInput, setAddInput] = useState([]);
+  const [inputFieldsWrowngAnswer, setInputFieldsWrowngAnswer] = useState([
+    {
+      wrong_answer: ''
+    }
+  ]);
+  const [valuesTopic, setValuesTopic] = useState(defaultTopic);
+  const [errorsInputTopic, setErrorsInputTopic] = useState(defaultTopic);
+  const [showInputsState, setShowInputsState] = useState(false);
 
-  function handleAddInput() {
-    const input = (
-      <input type="text" />
-    );
+  const handleChangeInputTopic = (event) => {
+    const {name, value} = event.target;
 
-    setAddInput(prev => 
-      [...prev, input]
-    );
+    setValuesTopic(prev => (
+      {
+        ...prev,
+        [name]: value
+      }
+    ));
+
+    setErrorsInputTopic(prev => (
+      {
+        ...prev,
+        [name]: event.target.validationMessage
+      }
+    ));
+
+    setIsValid(event.target.closest("form").checkValidity());
+  };
+
+  // Записать значение инпута с неправильным ответом в стейт inputFieldsWrowngAnswer
+  function handleChangeInputWrongAnswer(index, event) {
+    const values = [...inputFieldsWrowngAnswer];
+    values[index][event.target.name] = event.target.value;
+    setInputFieldsWrowngAnswer(values);
+  }
+
+  // Добавить input с неправильным ответом
+  function handleAddInputWrongAnswer() {
+    setInputFieldsWrowngAnswer([...inputFieldsWrowngAnswer, {wrong_answer: ''}]);
+  }
+
+  // Удалить input с неправильным ответом
+  function handleRemoveInputWrongAnswer(index) {
+    const values = [...inputFieldsWrowngAnswer];
+    values.splice(index, 1);
+    setInputFieldsWrowngAnswer(values);
+  }
+
+  function handleShowInputs() {
+    setShowInputsState(true);
   }
 
   function handleSubmit(event) {
     event.preventDefault();
 
-    //нужно блокировать кнопку сабмита во время отправки запроса!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    //нужно блокировать кнопку сабмита во время отправки запроса на сервер!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+    //всё что ниже в console.log можно отправлять на сервер
+    console.log(inputFieldsWrowngAnswer) // в inputFieldsWrowngAnswer получаем массив объектов из всех инпутов с неправильными ответами
+    console.log(values) // в values получаем данные всех остальных инпутов
+    console.log(valuesTopic) // в valuesTopic получаем данные инпута Темы
+
+    // при отправке данных на сервер очищаем всё, кроме поля с Темой
+    setInputFieldsWrowngAnswer([
+      {
+        wrong_answer: ''
+      }
+    ]);
+    resetForm();
   }
 
   return (
@@ -76,10 +129,11 @@ function Questions() {
             <>
               <div className="questions__form-inputsBlock">
                 <div>
-                  <p className="questions__form-inputsBlock-text">Тема вопросов:</p>
+                  <p className="questions__form-inputsBlock-text">Тема вопросов*:</p>
                   <input
-                    onChange={handleChange}
-                    value={values.topic}
+                    disabled={showInputsState}
+                    onChange={handleChangeInputTopic}
+                    value={valuesTopic.topic}
                     className="questions__input"
                     type="text"
                     name="topic"
@@ -87,69 +141,109 @@ function Questions() {
                     required
                   />
                   <ErrorMessage
-                    errorMessage={errors.topic}
+                    errorMessage={errorsInputTopic.topic}
                   />
-                </div>
-                <div>
-                  <p className="questions__form-inputsBlock-text">Вопрос:</p>
-                  <textarea
-                    className="questions__input questions__textarea"
-                    onChange={handleChange}
-                    value={values.question}
-                    type="text"
-                    name="question"
-                    placeholder="Вопрос..."
-                    required
-                  >
-                  </textarea>
-                  <ErrorMessage
-                    errorMessage={errors.question}
-                  />
-                </div>
-                <div>
-                  <p className="questions__form-inputsBlock-text">Подсказки:</p>
-                  <textarea
-                    className="questions__input questions__textarea"
-                    onChange={handleChange}
-                    value={values.help}
-                    type="text"
-                    name="help"
-                    placeholder="Подсказки..."
-                  >
-                  </textarea>
-                  <ErrorMessage
-                    errorMessage={errors.help}
-                  />
-                </div>
-                <div>
-                  <p className="questions__form-inputsBlock-text">Правильный ответ:</p>
-                  <textarea
-                    className="questions__input questions__textarea"
-                    onChange={handleChange}
-                    value={values.correct_answer}
-                    type="text"
-                    name="correct_answer"
-                    placeholder="Правильный ответ..."
-                    required
-                  >
-                  </textarea>
-                  <ErrorMessage
-                    errorMessage={errors.correct_answer}
-                  />
-                </div>
-                {/* блок добавления неправильных ответов */}
-                <div className="questions__form-add-wrong-answer">
-                  {
-                    addInput.map((item, index) => item)
+                  {!showInputsState &&
+                    <button
+                      className="questions__button questions__button_type_margin"
+                      type="button"
+                      onClick={handleShowInputs}
+                    >
+                      Создать тему
+                    </button>
                   }
-                  <button
-                    onClick={() => handleAddInput()}
-                    type="button"
-                    className="questions__button-add-wrong-answer"
-                  >
-                    Добавить неправильный ответ
-                  </button>
                 </div>
+                {showInputsState &&
+                  <>
+                    <div>
+                      <p className="questions__form-inputsBlock-text">Вопрос*:</p>
+                      <textarea
+                        className="questions__input questions__textarea"
+                        onChange={handleChange}
+                        value={values.question}
+                        type="text"
+                        name="question"
+                        placeholder="Вопрос..."
+                        required
+                      >
+                      </textarea>
+                      <ErrorMessage
+                        errorMessage={errors.question}
+                      />
+                    </div>
+                    <div>
+                      <p className="questions__form-inputsBlock-text">Подсказки:</p>
+                      <textarea
+                        className="questions__input questions__textarea"
+                        onChange={handleChange}
+                        value={values.help}
+                        type="text"
+                        name="help"
+                        placeholder="Подсказки..."
+                      >
+                      </textarea>
+                      <ErrorMessage
+                        errorMessage={errors.help}
+                      />
+                    </div>
+                    <div>
+                      <p className="questions__form-inputsBlock-text">Правильный ответ*:</p>
+                      <textarea
+                        className="questions__input questions__textarea"
+                        onChange={handleChange}
+                        value={values.correct_answer}
+                        type="text"
+                        name="correct_answer"
+                        placeholder="Правильный ответ..."
+                        required
+                      >
+                      </textarea>
+                      <ErrorMessage
+                        errorMessage={errors.correct_answer}
+                      />
+                    </div>
+                    {/* блок добавления неправильных ответов */}
+                    <div className="questions__form-add-wrong-answer">
+                      <p className="questions__form-inputsBlock-text">Неправильные ответы:</p>
+                      {
+                        inputFieldsWrowngAnswer.map((inputField, index) => (
+                        <div
+                          className="questions__form-add-wrong-answer-block"
+                          key={index}
+                        >
+                          <textarea
+                            className="questions__input questions__textarea questions__textarea-type_wrong"
+                            type="text"
+                            name="wrong_answer"
+                            placeholder="Неправильный ответ..."
+                            value={inputField.wrong_answer}
+                            onChange={event => handleChangeInputWrongAnswer(index, event)}
+                          >
+                          </textarea>
+                          <div className="questions__form-add-wrong-answer-buttons-block">
+                            <button
+                              className="questions__form-add-wrong-answer-button"
+                              onClick={() => handleRemoveInputWrongAnswer(index)}
+                              type="button"
+                            >
+                              -
+                            </button>
+                            <button
+                              className="questions__form-add-wrong-answer-button"
+                              onClick={() => handleAddInputWrongAnswer()}
+                              type="button"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                        ))
+                      }
+                    </div>
+                  </>
+                }
+
+
               </div>
               <div className="questions__form-buttonsBlock">
                 <button
@@ -165,10 +259,18 @@ function Questions() {
                   onClick={() => {
                     setAddTopicState(false);
                     resetForm();
+                    setInputFieldsWrowngAnswer([
+                      {
+                        wrong_answer: ''
+                      }
+                    ]);
+                    setValuesTopic(defaultTopic);
+                    setErrorsInputTopic(defaultTopic);
+                    setShowInputsState(false);
                   }}
                   className="questions__button"
                 >
-                  Завершить тему
+                  Сброс
                 </button>
               </div>
             </>

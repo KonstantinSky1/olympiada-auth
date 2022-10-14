@@ -92,6 +92,10 @@
   opacity: .5;
 }
 
+.questions__button_type_margin {
+  margin: 10px 0 0 0;
+}
+
 .visibility {
   visibility: hidden;
 }
@@ -119,10 +123,39 @@
   background-color: rgb(119, 204, 204);
   color: #fff;
   padding: 10px;
+  margin: 10px 0 0 0;
   border-radius: 3px;
   cursor: pointer;
+
 }
 
 .questions__button-add-wrong-answer:hover {
   opacity: .5;
+}
+
+.questions__form-add-wrong-answer-block {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 10px 0;
+}
+
+.questions__textarea-type_wrong {
+  width: 70%;
+  margin: 0 10px 0 0;
+}
+
+.questions__form-add-wrong-answer-buttons-block {
+  align-self: center;
+  display: flex;
+  gap: 30px;
+}
+
+.questions__form-add-wrong-answer-button {
+  border: none;
+  font-size: 1.2em;
+  border-radius: 5px;
+  width: 30px;
+  height: 30px;
+  background-color: #F2F9FF;
+  cursor: pointer;
 }
