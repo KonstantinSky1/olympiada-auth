@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useRef } from "react";
 import { Link } from 'react-router-dom';
 
 import { CurrentUserContext } from '../../contexts/CurrentUserContext.js';
@@ -28,8 +28,21 @@ function Questions() {
   ]);
   const [valuesTopic, setValuesTopic] = useState(defaultTopic);
   const [errorsInputTopic, setErrorsInputTopic] = useState(defaultTopic);
-  const [isValidInputTopic, setIsValidInputTopic] =useState(false);
+  const [isValidInputTopic, setIsValidInputTopic] = useState(false);
   const [showInputsState, setShowInputsState] = useState(false);
+  const [selectedQuestionFiles, setSelectedQuestionFiles] = useState(null);
+
+  const filePicker = useRef(null);
+
+  function handlePickFile(e) {
+    e.preventDefault();
+    filePicker.current.click();
+  }
+
+  function handleQuestionFileUploadChange(e) {
+    e.preventDefault();
+    setSelectedQuestionFiles([...e.target.files]);
+  }
 
   const handleChangeInputTopic = (event) => {
     let {name, value} = event.target;
@@ -74,15 +87,49 @@ function Questions() {
     setShowInputsState(true);
   }
 
+  //Удалить картинку Вопроса
+  function handleRemoveQuestionImage(index) {
+    const values = [...selectedQuestionFiles];
+    console.log(values)
+    values.splice(index, 1);
+    setSelectedQuestionFiles(values);
+  }
+
+  //Сдвинуть картинку Вопроса вверх и вниз =========================
+  function handleUpIndexQuestionImage(index) {
+    const values = [...selectedQuestionFiles];
+
+    if (index !== (values.length-1)) {
+      let item = (values.splice(index, 1))[0];
+      values.splice(index+1, 0, item);
+      setSelectedQuestionFiles(values);
+    }
+  }
+
+  function handleDownIndexQuestionImage(index) {
+    if (index !== 0) {
+      const values = [...selectedQuestionFiles];
+      let item = (values.splice(index, 1))[0];
+      values.splice(index-1, 0, item);
+      setSelectedQuestionFiles(values);
+    }
+  }
+  //========================================================
+
   function handleSubmit(event) {
     event.preventDefault();
 
     //нужно блокировать кнопку сабмита во время отправки запроса на сервер!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    //всё что ниже в console.log можно отправлять на сервер
-    console.log(inputFieldsWrowngAnswer) // в inputFieldsWrowngAnswer получаем массив объектов из всех инпутов с неправильными ответами
-    console.log(values) // в values получаем данные всех остальных инпутов
-    console.log(valuesTopic) // в valuesTopic получаем данные инпута Темы
+    //всё что ниже в console.log можно отправлять на сервер:
+    // в inputFieldsWrowngAnswer получаем массив объектов из всех инпутов с неправильными ответами
+    console.log(inputFieldsWrowngAnswer)
+    // в values получаем данные всех остальных инпутов
+    console.log(values)
+    // в valuesTopic получаем данные инпута Темы
+    console.log(valuesTopic)
+    // в selectedQuestionFiles получаем картинки вопроса
+    console.log(selectedQuestionFiles)
 
     // при отправке данных на сервер очищаем всё, кроме поля с Темой
     setInputFieldsWrowngAnswer([
@@ -91,6 +138,7 @@ function Questions() {
       }
     ]);
     resetForm();
+    setSelectedQuestionFiles(null);
   }
 
   return (
@@ -130,7 +178,7 @@ function Questions() {
             <>
               <div className="questions__form-inputsBlock">
                 <div>
-                  <p className="questions__form-inputsBlock-text">Тема вопросов*:</p>
+                  <p className="questions__form-inputsBlock-text">Предмет*:</p>
                   <input
                     disabled={showInputsState}
                     onChange={handleChangeInputTopic}
@@ -158,6 +206,7 @@ function Questions() {
                 </div>
                 {showInputsState &&
                   <>
+                    {/* Вопрос может быть текст или картинка. Текстовое поле обязательно, картинки не обязательно */}
                     <div>
                       <p className="questions__form-inputsBlock-text">Вопрос*:</p>
                       <textarea
@@ -173,6 +222,69 @@ function Questions() {
                       <ErrorMessage
                         errorMessage={errors.question}
                       />
+                    </div>
+                    {/* Картинки вопроса: */}
+                    <div>
+                      <p className="questions__form-inputsBlock-text">Картинки вопроса:</p>
+                      <button
+                        onClick={handlePickFile}
+                        className="questions__button"
+                      >
+                        Выбрать файл
+                      </button>
+                      <input
+                        className="questions__form-fileInput-hidden"
+                        ref={filePicker}
+                        type="file"
+                        onClick={(e) => e.target.value=null}
+                        onChange={handleQuestionFileUploadChange}
+                        accept="image/*,.png,.jpg,.gif,.web"
+                        multiple
+                      />
+                      {
+                        (selectedQuestionFiles) &&
+                          Array.from(selectedQuestionFiles).map((file, index) => {
+                            return (
+                                    <div
+                                      className="questions__form-image-block"
+                                      key={index}
+                                    >
+                                      <div>
+                                        <img
+                                          src={URL.createObjectURL(file)}
+                                          alt="Картинка"
+                                          className="questions__form-image"
+                                        />
+                                      </div>
+                                      <div className="questions__form-image-buttons">
+                                        {
+                                          (Array.from(selectedQuestionFiles).length > 1) &&
+                                          <div className="questions__form-image-buttons-up_down">
+                                            <button
+                                              type="button"
+                                              className="questions__form-button-image-down"
+                                              onClick={() => handleUpIndexQuestionImage(index)}
+                                            >
+                                            </button>
+                                            <button
+                                              type="button"
+                                              className="questions__form-button-image-up"
+                                              onClick={() => handleDownIndexQuestionImage(index)}
+                                            >
+                                            </button>
+                                          </div>
+                                        }
+                                        <button
+                                          onClick={() => handleRemoveQuestionImage(index)}
+                                          className="questions__form-button-image-delete"
+                                          type="button"
+                                        >
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )
+                        })
+                      }
                     </div>
                     <div>
                       <p className="questions__form-inputsBlock-text">Подсказки:</p>
@@ -269,6 +381,7 @@ function Questions() {
                     setErrorsInputTopic(defaultTopic);
                     setShowInputsState(false);
                     setIsValidInputTopic(false);
+                    setSelectedQuestionFiles(null);
                   }}
                   className="questions__button"
                 >

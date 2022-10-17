@@ -71,6 +71,65 @@
   color: #8298AB;
 }
 
+.questions__form-fileInput-hidden {
+  opacity: 0;
+  height: 0;
+  width: 0;
+  line-height: 0;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+}
+
+.questions__form-image-block {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 30px 0 30px 0;
+}
+
+.questions__form-image {
+  display: block;
+  max-width: 100%;
+  /* margin: 10px auto 0; */
+  /* object-fit: cover;
+  object-position: 50% 50%; */
+}
+
+.questions__form-image-buttons {
+  margin: 0 0 0 20px;
+  display: flex;
+}
+
+.questions__form-image-buttons-up_down {
+  display: flex;
+}
+
+.questions__form-button-image-delete {
+  background: transparent url('../../images/delete-icon.svg') no-repeat;
+  border: none;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  margin: 0 0 0 20px;
+}
+
+.questions__form-button-image-down {
+  background: transparent url('../../images/arrow-down.svg') no-repeat;
+  border: none;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+}
+
+.questions__form-button-image-up {
+  background: transparent url('../../images/arrow-up.svg') no-repeat;
+  border: none;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+}
+
 .questions__textarea {
   resize: none;
   width: none;
