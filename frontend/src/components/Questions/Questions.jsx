@@ -11,7 +11,9 @@ function Questions() {
   const defaultQuestions = {
     question: '',
     correct_answer: '',
-    help: ''
+    help: '',
+    wrong_answer_one: '',
+    wrong_answer_two: ''
   };
   const defaultTopic = {
     topic: ''
@@ -21,27 +23,98 @@ function Questions() {
   const { values, handleChange, errors, resetForm, isValid } = useFormWithValidation(defaultQuestions);
 
   const [addTopicState, setAddTopicState] = useState(false);
-  const [inputFieldsWrowngAnswer, setInputFieldsWrowngAnswer] = useState([
-    {
-      wrong_answer: ''
-    }
-  ]);
+  //Для динамически создаваемых инпутов:
+  // const [inputFieldsWrowngAnswer, setInputFieldsWrowngAnswer] = useState([
+  //   {
+  //     wrong_answer: ''
+  //   }
+  // ]);
+  //Данные предмета в valuesTopic
   const [valuesTopic, setValuesTopic] = useState(defaultTopic);
   const [errorsInputTopic, setErrorsInputTopic] = useState(defaultTopic);
   const [isValidInputTopic, setIsValidInputTopic] = useState(false);
   const [showInputsState, setShowInputsState] = useState(false);
+  //Файлы вопроса в selectedQuestionFiles
   const [selectedQuestionFiles, setSelectedQuestionFiles] = useState(null);
+  //Файл Правильного ответа в selectedCorrectAnswerFile
+  const [selectedCorrectAnswerFile, setSelectedCorrectAnswerFile] = useState(null);
+  //Файл Неправильного ответа1 в selectedWrongAnswerOneFile
+  const [selectedWrongAnswerFirstFile, setSelectedWrongAnswerFirstFile] = useState(null);
+  //Файл Неправильного ответа2 в selectedWrongAnswerSecondFile
+  const [selectedWrongAnswerSecondFile, setSelectedWrongAnswerSecondFile] = useState(null);
+  //Стейты установки ошибки в случае превышения файла заданного размера
+  const [errorMessageFileSizeCorrectAnswer, setErrorMessageFileSizeCorrectAnswer] = useState('');
+  const [errorMessageFileSizeWrongAnswerFirst, setErrorMessageFileSizeWrongAnswerFirst] = useState('');
+  const [errorMessageFileSizeWrongAnswerSecond, setErrorMessageFileSizeWrongAnswerSecond] = useState('');
+  const [errorMessageFileSizeQuestion, setErrorMessageFileSizeQuestion] = useState('');
 
-  const filePicker = useRef(null);
+  const filePickerQuestion = useRef(null);
+  const filePickerCorrectAnswer = useRef(null);
+  const filePickerWrongAnswerFirst = useRef(null);
+  const filePickerWrongAnswerSecond = useRef(null);
 
-  function handlePickFile(e) {
+  function handlePickFileQuestion(e) {
     e.preventDefault();
-    filePicker.current.click();
+    filePickerQuestion.current.click();
+  }
+
+  function handlePickFileCorrectAnswer(e) {
+    e.preventDefault();
+    filePickerCorrectAnswer.current.click();
+  }
+
+  function handlePickFileWrongAnswerOne(e) {
+    e.preventDefault();
+    filePickerWrongAnswerFirst.current.click();
+  }
+
+  function handlePickFileWrongAnswerTwo(e) {
+    e.preventDefault();
+    filePickerWrongAnswerSecond.current.click();
   }
 
   function handleQuestionFileUploadChange(e) {
     e.preventDefault();
+    let arr = [...e.target.files];
+    for (let i=0; i<arr.length; i++) {
+      if (arr[i].size > 2000000) {
+        setErrorMessageFileSizeQuestion('Каждый файл не должен превышать 2 МБ');
+        return;
+      } else {
+        setErrorMessageFileSizeQuestion('');
+      }
+    }
     setSelectedQuestionFiles([...e.target.files]);
+  }
+
+  function handleCorrectAnswerFileUploadChange(e) {
+    e.preventDefault();
+    if (e.target.files[0].size < 2000000) {
+      setErrorMessageFileSizeCorrectAnswer('');
+      setSelectedCorrectAnswerFile([e.target.files[0]]);
+    } else {
+      setErrorMessageFileSizeCorrectAnswer('Файл превышает 2Мб');
+    }
+  }
+
+  function handleWrongAnswerFirstFileUploadChange(e) {
+    e.preventDefault();
+    if (e.target.files[0].size < 2000000) {
+      setErrorMessageFileSizeWrongAnswerFirst('');
+      setSelectedWrongAnswerFirstFile([e.target.files[0]]);
+    } else {
+        setErrorMessageFileSizeWrongAnswerFirst('Файл превышает 2Мб');
+    }
+  }
+
+  function handleWrongAnswerSecondFileUploadChange(e) {
+    e.preventDefault();
+    if (e.target.files[0].size < 2000000) {
+      setErrorMessageFileSizeWrongAnswerSecond('');
+      setSelectedWrongAnswerSecondFile([e.target.files[0]]);
+    } else {
+        setErrorMessageFileSizeWrongAnswerSecond('Файл превышает 2Мб');
+    }
   }
 
   const handleChangeInputTopic = (event) => {
@@ -64,24 +137,26 @@ function Questions() {
     setIsValidInputTopic(event.target.closest("form").checkValidity());
   };
 
+  //Для динамически создаваемых инпутов: ============================================
   // Записать значение инпута с неправильным ответом в стейт inputFieldsWrowngAnswer
-  function handleChangeInputWrongAnswer(index, event) {
-    const values = [...inputFieldsWrowngAnswer];
-    values[index][event.target.name] = event.target.value;
-    setInputFieldsWrowngAnswer(values);
-  }
+  // function handleChangeInputWrongAnswer(index, event) {
+  //   const values = [...inputFieldsWrowngAnswer];
+  //   values[index][event.target.name] = event.target.value;
+  //   setInputFieldsWrowngAnswer(values);
+  // }
 
-  // Добавить input с неправильным ответом
-  function handleAddInputWrongAnswer() {
-    setInputFieldsWrowngAnswer([...inputFieldsWrowngAnswer, {wrong_answer: ''}]);
-  }
+  // // Добавить input с неправильным ответом
+  // function handleAddInputWrongAnswer() {
+  //   setInputFieldsWrowngAnswer([...inputFieldsWrowngAnswer, {wrong_answer: ''}]);
+  // }
 
-  // Удалить input с неправильным ответом
-  function handleRemoveInputWrongAnswer(index) {
-    const values = [...inputFieldsWrowngAnswer];
-    values.splice(index, 1);
-    setInputFieldsWrowngAnswer(values);
-  }
+  // // Удалить input с неправильным ответом
+  // function handleRemoveInputWrongAnswer(index) {
+  //   const values = [...inputFieldsWrowngAnswer];
+  //   values.splice(index, 1);
+  //   setInputFieldsWrowngAnswer(values);
+  // }
+  // =================================================================================
 
   function handleShowInputs() {
     setShowInputsState(true);
@@ -90,7 +165,6 @@ function Questions() {
   //Удалить картинку Вопроса
   function handleRemoveQuestionImage(index) {
     const values = [...selectedQuestionFiles];
-    console.log(values)
     values.splice(index, 1);
     setSelectedQuestionFiles(values);
   }
@@ -114,7 +188,7 @@ function Questions() {
       setSelectedQuestionFiles(values);
     }
   }
-  //========================================================
+  //================================================================
 
   function handleSubmit(event) {
     event.preventDefault();
@@ -122,23 +196,29 @@ function Questions() {
     //нужно блокировать кнопку сабмита во время отправки запроса на сервер!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     //всё что ниже в console.log можно отправлять на сервер:
-    // в inputFieldsWrowngAnswer получаем массив объектов из всех инпутов с неправильными ответами
-    console.log(inputFieldsWrowngAnswer)
     // в values получаем данные всех остальных инпутов
     console.log(values)
     // в valuesTopic получаем данные инпута Темы
     console.log(valuesTopic)
     // в selectedQuestionFiles получаем картинки вопроса
     console.log(selectedQuestionFiles)
+    //в selectedCorrectAnswerFile получаем картинку Правильного ответам
+    console.log(selectedCorrectAnswerFile)
+    //в selectedWrongAnswerFirstFile получаем картинку Первого неправильного ответа
+    console.log(selectedWrongAnswerFirstFile)
+    //в selectedWrongAnswerSecondFile получаем картинку Второго неправильного ответа
+    console.log(selectedWrongAnswerSecondFile)
 
     // при отправке данных на сервер очищаем всё, кроме поля с Темой
-    setInputFieldsWrowngAnswer([
-      {
-        wrong_answer: ''
-      }
-    ]);
     resetForm();
     setSelectedQuestionFiles(null);
+    setSelectedCorrectAnswerFile(null);
+    setSelectedWrongAnswerFirstFile(null);
+    setSelectedWrongAnswerSecondFile(null);
+    setErrorMessageFileSizeCorrectAnswer('');
+    setErrorMessageFileSizeWrongAnswerFirst('');
+    setErrorMessageFileSizeWrongAnswerSecond('');
+    setErrorMessageFileSizeQuestion('');
   }
 
   return (
@@ -186,7 +266,7 @@ function Questions() {
                     className="questions__input"
                     type="text"
                     name="topic"
-                    placeholder="Тема вопросов..."
+                    placeholder="Введите название предмета..."
                     required
                   />
                   <ErrorMessage
@@ -200,7 +280,7 @@ function Questions() {
                       type="button"
                       onClick={handleShowInputs}
                     >
-                      Создать тему
+                      Создать
                     </button>
                   }
                 </div>
@@ -227,19 +307,23 @@ function Questions() {
                     <div>
                       <p className="questions__form-inputsBlock-text">Картинки вопроса:</p>
                       <button
-                        onClick={handlePickFile}
+                        onClick={handlePickFileQuestion}
                         className="questions__button"
                       >
                         Выбрать файл
                       </button>
                       <input
                         className="questions__form-fileInput-hidden"
-                        ref={filePicker}
+                        ref={filePickerQuestion}
                         type="file"
                         onClick={(e) => e.target.value=null}
                         onChange={handleQuestionFileUploadChange}
                         accept="image/*,.png,.jpg,.gif,.web"
                         multiple
+                      />
+                      <ErrorMessage
+                        errorMessage={errorMessageFileSizeQuestion}
+                        style={{fontSize: '.8em'}}
                       />
                       {
                         (selectedQuestionFiles) &&
@@ -301,8 +385,9 @@ function Questions() {
                         errorMessage={errors.help}
                       />
                     </div>
+                    {/* Правильный ответ: */}
                     <div>
-                      <p className="questions__form-inputsBlock-text">Правильный ответ*:</p>
+                      <p className="questions__form-inputsBlock-text">Правильный ответ:</p>
                       <textarea
                         className="questions__input questions__textarea"
                         onChange={handleChange}
@@ -310,15 +395,56 @@ function Questions() {
                         type="text"
                         name="correct_answer"
                         placeholder="Правильный ответ..."
-                        required
                       >
                       </textarea>
                       <ErrorMessage
                         errorMessage={errors.correct_answer}
                       />
                     </div>
-                    {/* блок добавления неправильных ответов */}
-                    <div className="questions__form-add-wrong-answer">
+                    {/* Картинка ответа: */}
+                    <div>
+                      <p className="questions__form-inputsBlock-text">Картинка правильного ответа:</p>
+                      <button
+                        onClick={handlePickFileCorrectAnswer}
+                        className="questions__button"
+                      >
+                        Выбрать файл
+                      </button>
+                      <input
+                        className="questions__form-fileInput-hidden"
+                        ref={filePickerCorrectAnswer}
+                        type="file"
+                        onClick={(e) => e.target.value=null}
+                        onChange={handleCorrectAnswerFileUploadChange}
+                        accept="image/*,.png,.jpg,.gif,.web"
+                      />
+                      <ErrorMessage
+                        errorMessage={errorMessageFileSizeCorrectAnswer}
+                        style={{fontSize: '.8em'}}
+                      />
+                      {
+                        (selectedCorrectAnswerFile) &&
+                        <div className="questions__form-image-block">
+                          <div>
+                            <img
+                              src={URL.createObjectURL(selectedCorrectAnswerFile[0])}
+                              alt="Картинка"
+                              className="questions__form-image"
+                            />
+                          </div>
+                          <div className="questions__form-image-buttons">
+                          <button
+                            onClick={() => setSelectedCorrectAnswerFile(null)}
+                            className="questions__form-button-image-delete"
+                            type="button"
+                          >
+                          </button>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                    {/* блок добавления неправильных ответов (Динамически создаваемые инпуты. Можно добавить или удалить)*/}
+                    {/* <div className="questions__form-add-wrong-answer">
                       <p className="questions__form-inputsBlock-text">Неправильные ответы:</p>
                       {
                         inputFieldsWrowngAnswer.map((inputField, index) => (
@@ -354,6 +480,124 @@ function Questions() {
                         </div>
                         ))
                       }
+                    </div> */}
+
+                    {/* Неправильный ответ 1: */}
+                    <div>
+                      <p className="questions__form-inputsBlock-text">Неправильный ответ 1:</p>
+                      <textarea
+                        className="questions__input questions__textarea"
+                        onChange={handleChange}
+                        value={values.wrong_answer_one}
+                        type="text"
+                        name="wrong_answer_one"
+                        placeholder="Неправильный ответ 1..."
+                      >
+                      </textarea>
+                      <ErrorMessage
+                        errorMessage={errors.wrong_answer_one}
+                      />
+                    </div>
+                    {/* Картинка неправильного ответа 1: */}
+                    <div>
+                      <p className="questions__form-inputsBlock-text">Картинка неправильного ответа 1:</p>
+                      <button
+                        onClick={handlePickFileWrongAnswerOne}
+                        className="questions__button"
+                      >
+                        Выбрать файл
+                      </button>
+                      <input
+                        className="questions__form-fileInput-hidden"
+                        ref={filePickerWrongAnswerFirst}
+                        type="file"
+                        onClick={(e) => e.target.value=null}
+                        onChange={handleWrongAnswerFirstFileUploadChange}
+                        accept="image/*,.png,.jpg,.gif,.web"
+                      />
+                      <ErrorMessage
+                        errorMessage={errorMessageFileSizeWrongAnswerFirst}
+                        style={{fontSize: '.8em'}}
+                      />
+                      {
+                        (selectedWrongAnswerFirstFile) &&
+                        <div className="questions__form-image-block">
+                          <div>
+                            <img
+                              src={URL.createObjectURL(selectedWrongAnswerFirstFile[0])}
+                              alt="Картинка"
+                              className="questions__form-image"
+                            />
+                          </div>
+                          <div className="questions__form-image-buttons">
+                          <button
+                            onClick={() => setSelectedWrongAnswerFirstFile(null)}
+                            className="questions__form-button-image-delete"
+                            type="button"
+                          >
+                          </button>
+                          </div>
+                        </div>
+                      }
+                    </div>
+
+                    {/* Неправильный ответ 2: */}
+                    <div>
+                      <p className="questions__form-inputsBlock-text">Неправильный ответ 2:</p>
+                      <textarea
+                        className="questions__input questions__textarea"
+                        onChange={handleChange}
+                        value={values.wrong_answer_two}
+                        type="text"
+                        name="wrong_answer_two"
+                        placeholder="Неправильный ответ 2..."
+                      >
+                      </textarea>
+                      <ErrorMessage
+                        errorMessage={errors.wrong_answer_two}
+                      />
+                    </div>
+                    {/* Картинка неправильного ответа 2: */}
+                    <div>
+                      <p className="questions__form-inputsBlock-text">Картинка неправильного ответа 2:</p>
+                      <button
+                        onClick={handlePickFileWrongAnswerTwo}
+                        className="questions__button"
+                      >
+                        Выбрать файл
+                      </button>
+                      <input
+                        className="questions__form-fileInput-hidden"
+                        ref={filePickerWrongAnswerSecond}
+                        type="file"
+                        onClick={(e) => e.target.value=null}
+                        onChange={handleWrongAnswerSecondFileUploadChange}
+                        accept="image/*,.png,.jpg,.gif,.web"
+                      />
+                      <ErrorMessage
+                        errorMessage={errorMessageFileSizeWrongAnswerSecond}
+                        style={{fontSize: '.8em'}}
+                      />
+                      {
+                        (selectedWrongAnswerSecondFile) &&
+                        <div className="questions__form-image-block">
+                          <div>
+                            <img
+                              src={URL.createObjectURL(selectedWrongAnswerSecondFile[0])}
+                              alt="Картинка"
+                              className="questions__form-image"
+                            />
+                          </div>
+                          <div className="questions__form-image-buttons">
+                          <button
+                            onClick={() => setSelectedWrongAnswerSecondFile(null)}
+                            className="questions__form-button-image-delete"
+                            type="button"
+                          >
+                          </button>
+                          </div>
+                        </div>
+                      }
                     </div>
                   </>
                 }
@@ -372,16 +616,18 @@ function Questions() {
                   onClick={() => {
                     setAddTopicState(false);
                     resetForm();
-                    setInputFieldsWrowngAnswer([
-                      {
-                        wrong_answer: ''
-                      }
-                    ]);
                     setValuesTopic(defaultTopic);
                     setErrorsInputTopic(defaultTopic);
                     setShowInputsState(false);
                     setIsValidInputTopic(false);
                     setSelectedQuestionFiles(null);
+                    setSelectedCorrectAnswerFile(null);
+                    setSelectedWrongAnswerFirstFile(null);
+                    setSelectedWrongAnswerSecondFile(null);
+                    setErrorMessageFileSizeCorrectAnswer('');
+                    setErrorMessageFileSizeWrongAnswerFirst('');
+                    setErrorMessageFileSizeWrongAnswerSecond('');
+                    setErrorMessageFileSizeQuestion('');
                   }}
                   className="questions__button"
                 >
